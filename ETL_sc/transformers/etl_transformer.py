@@ -1,5 +1,6 @@
 """ETL component"""
 
+import logging
 from typing import List, NamedTuple
 from ETL_sc.common.s3 import S3BucketConnector
 
@@ -71,7 +72,8 @@ class StockETL():
         :param trg_args: Namedtuple class with target configuration data
 
         """
-
+        
+        self._logger = logging.getLogger(__name__)  
         self.s3_bucket_src = s3_bucket_src
         self.s3_bucket_trg = s3_bucket_trg
         self.meta_key = meta_key
