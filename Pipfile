@@ -11,6 +11,8 @@ boto3 = "*"
 jupyter-contrib-nbextensions = "*"
 pyarrow = "*"
 pyyaml = "*"
+pylint = "*"
+moto = "*"
 
 [dev-packages]
 

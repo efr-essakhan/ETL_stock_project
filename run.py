@@ -20,7 +20,7 @@ def main():
     logging.config.dictConfig(log_config) #loading the config as a dictionary
     logger = logging.getLogger(__name__)
     logger.info("This is a test.")
-    
+
 
 
 
