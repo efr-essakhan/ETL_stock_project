@@ -54,7 +54,7 @@ class S3BucketConnector():
         Returns:
             data_frame: Pandas dataframe containing the data of the CSV file.
         """
-        self._logger.info('Reading file %s/%s/%s , from target bucket', self.endpoint_url, self._bucket.name, key)
+        self._logger.info('Reading file %s/%s/%s', self.endpoint_url, self._bucket.name, key)
 
         csv_obj = self._bucket.Object(key=key).get().get('Body').read().decode(encoding) #Get the specified object using its key from the bucket.
         data = io.StringIO(csv_obj) #Convert the CSV object into string format into memory - so that it can be used without saving into hdd (its the alternative accpeted by pandas)
@@ -62,3 +62,4 @@ class S3BucketConnector():
         return data_frame
 
     def write_df_to_s3(self):
+        pass

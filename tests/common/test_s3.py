@@ -4,6 +4,7 @@ import os
 import unittest
 
 import boto3
+import pandas as pd
 
 from moto import mock_s3
 
@@ -99,6 +100,46 @@ class TestS3BucketConnectorMethods(unittest.TestCase):
         list_result = self.s3_bucket_conn.list_files_in_prefix(prefix_expected)
         #Test after method execution
         self.assertTrue(not list_result) #checks if list_result is empty
+
+    def test_read_csv_to_df_ok(self):
+        """Tests the read_csv_as_df method for
+        reading one .csv file from the mocked s3 bucket - checking if retrieved file matches to the
+        Dataframe formulated from it.
+        """
+
+        #Expected results
+        key_exp = 'test.csv'
+        col1_exp = 'col1'
+        col2_exp = 'col2'
+        val1_exp = 'val1'
+        val2_exp = 'val2'
+        log_exp = f'Reading file {self.s3_endpoint_url}/{self.s3_bucket_name}/{key_exp}'
+        #Test init/Setup
+        csv_content = f'{col1_exp},{col2_exp}\n{val1_exp},{val2_exp}'
+        self.s3_bucket.put_object(Body=csv_content, Key=key_exp) #upload csv content into the mock S3
+        # Method execution
+        with self.assertLogs() as logm: #picks up any loggings
+            df_result = self.s3_bucket_conn.read_csv_as_df(key_exp)
+            # Logging test after method execution
+            self.assertIn(log_exp, logm.output[0]) #output holds the logs printed in order
+
+        #Test after method execution
+        self.assertEqual(df_result.shape[0], 1)  #df_result.shape = (row, col) = (1,2)
+        self.assertEqual(df_result.shape[1], 2)
+        self.assertEqual(val1_exp, df_result[col1_exp][0])
+        self.assertEqual(val2_exp, df_result[col2_exp][0])
+        #Clean-up after test
+        self.s3_bucket.delete_objects( #deleting objects from mock
+            Delete={
+                'Objects': [
+                    {
+                        'Key': key_exp
+                    }
+                ]
+            }
+        )
+
+
 
 
 
