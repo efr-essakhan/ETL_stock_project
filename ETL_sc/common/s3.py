@@ -3,8 +3,11 @@
 import os
 import logging
 import boto3
-import io
+from io import StringIO, BytesIO
 import pandas as pd
+from constants import S3FileTypes
+
+from custom_exceptions import *
 
 from botocore.vendored.six import StringIO
 
@@ -61,5 +64,50 @@ class S3BucketConnector():
         data_frame = pd.read_csv(data, sep=sep)
         return data_frame
 
-    def write_df_to_s3(self):
-        pass
+    def write_df_to_s3(self, data_frame: pd.DataFrame, key: str, file_format: str):
+        """Writing a pandas DF to S3 bucket, first converting it into .CSV or .Parquet before storing.
+        Supported formats: .csv, .parquet
+
+        Args:
+            data_frame (pd.DataFrame): Dataframe that should be written to S3.
+            key (str): target key of the file to be saved into S3
+            file_format (str): format of the saved file. Either .csv or .parquet.
+
+        Raises:
+            WrongFormatException: [description]
+
+        Returns:
+            [type]: [description]
+        """
+
+        if data_frame.empty:
+            self._logger.info('The dataframe is empty! No file will be written!')
+            return None
+        elif file_format == S3FileTypes.CSV.value:
+            out_buffer = StringIO() #To handle data in memory - this is what pandas accepts (a buffer)
+            data_frame.to_csv(out_buffer, index=False)
+            return self.__put_object(out_buffer, key)
+        elif file_format == S3FileTypes.PARQUET.value:
+            out_buffer = StringIO()
+            data_frame.to_parquet(out_buffer, index=False)
+            return self.__put_object(out_buffer, key)
+        else:
+            self._logger.info('The file format %s is not supported supported to be written to S3', file_format)
+            raise WrongFormatException
+
+
+
+
+    def __put_object(self, out_buffer: StringIO or BytesIO, key: str):
+        """Helper function for self.write_df_to_s3(). Put file into target bucket.
+
+        Args:
+            out_buffer (StringIOorBytesIO): Buffer that should be written to S3 bucket
+            key (str): target key of the saved-file
+
+        Returns:
+            Boolean: indicates process is finished.
+        """
+        self._logger.info('Writing file to %s/%s/%s', self._endpount_url, self._bucket.name, key)
+        self._bucket.put_object(Body = out_buffer.getvalue(), Key=key)
+        return True
