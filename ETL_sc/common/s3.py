@@ -3,6 +3,10 @@
 import os
 import logging
 import boto3
+import io
+import pandas as pd
+
+from botocore.vendored.six import StringIO
 
 class S3BucketConnector():
     """
@@ -39,8 +43,22 @@ class S3BucketConnector():
         files = [obj.key for obj in self._bucket.objects.filter(Prefix=prefix)]
         return files #files names in reality
 
-    def read_csv_as_df(self):
-        pass
+    def read_csv_as_df(self, key: str, encoding: str = 'utf-8', sep = ','):
+        """Reading the csv file from the S3 bucket and returning the file as a dataframe
+
+        Args:
+            key (str): key of the file that should be read
+            encoding (str, optional): encoding of the data inside the csv file. Defaults to 'utf-8'.
+            sep (str, optional): seperator of the csv file. Defaults to ','.
+
+        Returns:
+            data_frame: Pandas dataframe containing the data of the CSV file.
+        """
+        self._logger.info('Reading file %s/%s/%s , from target bucket', self.endpoint_url, self._bucket.name, key)
+
+        csv_obj = self._bucket.Object(key=key).get().get('Body').read().decode(encoding) #Get the specified object using its key from the bucket.
+        data = io.StringIO(csv_obj) #Convert the CSV object into string format into memory - so that it can be used without saving into hdd (its the alternative accpeted by pandas)
+        data_frame = pd.read_csv(data, sep=sep)
+        return data_frame
 
     def write_df_to_s3(self):
-        pass
