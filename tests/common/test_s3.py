@@ -1,5 +1,6 @@
 """Test S3bucketConnector methods"""
 
+from ETL_sc.common.custom_exceptions import WrongFormatException
 from io import StringIO, BytesIO
 import os
 import unittest
@@ -195,9 +196,6 @@ class TestS3BucketConnectorMethods(unittest.TestCase):
             }
         )
 
-
-
-
     def test_write_df_to_s3_parquet(self):
         """Tests the write_df_to_s3 method if writing to parquet is successfull
         """
@@ -232,6 +230,23 @@ class TestS3BucketConnectorMethods(unittest.TestCase):
                 ]
             }
         )
+
+    def test_write_df_to_wrong_s3_format(self):
+        """Tests the write_df_to_s3 method if not supported format is given as argument, also checks the exception
+        and logging for correctness.
+        """
+        #Expected result
+        df_exp = pd.DataFrame([['A', 'B'], ['C', 'D']], columns=['col1', 'col2'])
+        key_exp = 'test.parquet'
+        format_exp = 'wrong_format'
+        log_exp = f'The file format {format_exp} is not supported supported to be written to S3'
+        exception_exp = WrongFormatException
+        # Method execution
+        with self.assertLogs() as logm:
+            with self.assertRaises(exception_exp):
+                self.s3_bucket_conn.write_df_to_s3(df_exp, key_exp, format_exp)
+            #Logging test
+            self.assertIn(log_exp, logm.output[0])
 
 
 
