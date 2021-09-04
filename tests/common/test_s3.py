@@ -1,6 +1,6 @@
 """Test S3bucketConnector methods"""
 
-from io import StringIO
+from io import StringIO, BytesIO
 import os
 import unittest
 
@@ -184,10 +184,54 @@ class TestS3BucketConnectorMethods(unittest.TestCase):
         #Test after method execution
         self.assertEqual(return_exp, result)
         self.assertTrue(df_exp.equals(df_result))
+        #Clean-up after test
+        self.s3_bucket.delete_objects( #deleting objects from mock
+            Delete={
+                'Objects': [
+                    {
+                        'Key': key_exp
+                    }
+                ]
+            }
+        )
 
 
 
 
+    def test_write_df_to_s3_parquet(self):
+        """Tests the write_df_to_s3 method if writing to parquet is successfull
+        """
+        #Expected result
+        return_exp = True
+        df_exp = pd.DataFrame([['A', 'B'], ['C', 'D']], columns=['col1', 'col2'])
+        key_exp = 'test.parquet'
+        log_exp = f'Writing file to {self.s3_endpoint_url}/{self.s3_bucket_name}/{key_exp}'
+        #Test init
+        file_format = 'parquet'
+        #Method execution
+        with self.assertLogs() as logm:
+            result = self.s3_bucket_conn.write_df_to_s3(df_exp, key_exp, file_format) #storing the data to S3
+            #Logging
+            #self.assertIn(log_exp, logm[0])
+
+        #Retrieving the data back for testing
+        data = self.s3_bucket.Object(key=key_exp).get().get('Body').read()
+        out_buffer = BytesIO(data)
+        df_result = pd.read_parquet(out_buffer)
+
+        #Test after method execution
+        self.assertEqual(return_exp, result)
+        self.assertTrue(df_exp.equals(df_result))
+        #Clean-up after test
+        self.s3_bucket.delete_objects( #deleting objects from mock
+            Delete={
+                'Objects': [
+                    {
+                        'Key': key_exp
+                    }
+                ]
+            }
+        )
 
 
 
