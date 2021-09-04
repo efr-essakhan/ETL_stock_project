@@ -139,6 +139,29 @@ class TestS3BucketConnectorMethods(unittest.TestCase):
             }
         )
 
+    def test_write_df_to_s3_empty(self):
+        """Tests the write_df_to_s3 method with an empty Dataframe as input
+        """
+        #Expected results
+        return_exp = None
+        log_exp = 'The dataframe is empty! No file will be written!'
+        #Test init
+        df_empty = pd.DataFrame()
+        key = 'key.csv'
+        file_format = 'csv'
+        #Method execution
+        with self.assertLogs() as logm:
+            result = self.s3_bucket_conn.write_df_to_s3(df_empty, key, file_format)
+            #Log test
+            self.assertIn(log_exp, logm.output[0])
+
+        #Test after method execution
+        self.assertEqual(return_exp, result)
+
+
+
+
+
 
 
 
