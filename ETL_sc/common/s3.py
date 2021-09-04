@@ -1,13 +1,12 @@
 """Connector and methods accessing S3"""
 
+from ETL_sc.common.custom_exceptions import *
 import os
 import logging
 import boto3
 from io import StringIO, BytesIO
 import pandas as pd
-from constants import S3FileTypes
-
-from custom_exceptions import *
+from ETL_sc.common.constants import S3FileTypes
 
 from botocore.vendored.six import StringIO
 
@@ -60,7 +59,7 @@ class S3BucketConnector():
         self._logger.info('Reading file %s/%s/%s', self.endpoint_url, self._bucket.name, key)
 
         csv_obj = self._bucket.Object(key=key).get().get('Body').read().decode(encoding) #Get the specified object using its key from the bucket.
-        data = io.StringIO(csv_obj) #Convert the CSV object into string format into memory - so that it can be used without saving into hdd (its the alternative accpeted by pandas)
+        data = StringIO(csv_obj) #Convert the CSV object into string format into memory - so that it can be used without saving into hdd (its the alternative accpeted by pandas)
         data_frame = pd.read_csv(data, sep=sep)
         return data_frame
 
@@ -108,6 +107,6 @@ class S3BucketConnector():
         Returns:
             Boolean: indicates process is finished.
         """
-        self._logger.info('Writing file to %s/%s/%s', self._endpount_url, self._bucket.name, key)
+        self._logger.info('Writing file to %s/%s/%s', self.endpoint_url, self._bucket.name, key)
         self._bucket.put_object(Body = out_buffer.getvalue(), Key=key)
         return True
