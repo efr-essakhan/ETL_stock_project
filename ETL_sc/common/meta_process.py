@@ -38,10 +38,10 @@ class MetaProcess():
         df_new = pd.DataFrame(columns=[
             MetaProcessFormat.META_SOURCE_DATE_COL.value,
             MetaProcessFormat.META_PROCESS_COL.value])
-        #Filling the data columns with extract_date_list
+        #Filling the data columns with values in extract_date_list
         df_new[MetaProcessFormat.META_SOURCE_DATE_COL.value] = extract_date_list
-        #Filling the processed column
-        df_new[MetaProcessFormat.META_PROCESS_COL] = \
+        #Filling the processed column with today's date
+        df_new[MetaProcessFormat.META_PROCESS_COL.value] = \
             datetime.today().strftime(MetaProcessFormat.META_DATE_FORMAT.value)
 
         try:
@@ -55,21 +55,17 @@ class MetaProcess():
                 #If meta file exists & in correct formar -> then union/appnend DataFrame of old and the new meta-data created.
                 df_all = pd.concat([df_old, df_new])
 
-        except s3_bucket_conn.session.client('S3').exceptions.NoSuchKey:
+        except s3_bucket_conn.session.client('s3').exceptions.NoSuchKey:
             # No meta-file exists -> then only the new data is used to create new meta-file
             df_all = df_new
 
         #Writing new/updated meta-file to S3
-        s3_bucket_conn.write_df_to_s3(df_all, meta_key, MetaProcessFormat.META_DATE_FORMAT.value)
+        s3_bucket_conn.write_df_to_s3(df_all, meta_key, MetaProcessFormat.META_FILE_FORMAT.value)
         return True
 
 
 
 
-
-
-
-        #Filling the processed column
 
     @staticmethod
     def return_date_list():
