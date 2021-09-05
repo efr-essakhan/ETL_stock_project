@@ -11,7 +11,7 @@ class S3FileTypes(Enum):
 
 
 class MetaProcessFormat(Enum):
-    """formation for MetaProcess class"""
+    """These constants are used in the formation of MetaProcess Class in meta_process.py"""
     META_DATE_FORMAT = '%Y-%m-%d'
     META_PROCESS_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     META_SOURCE_DATE_COL = 'source_date'
