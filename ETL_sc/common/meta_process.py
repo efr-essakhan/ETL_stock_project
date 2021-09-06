@@ -22,7 +22,7 @@ class MetaProcess():
         Updating the meta-file with the processed Stock-data dates, and todays-date as prodcessed-date.
 
         Args:
-            extract_date_list (list): A list of dates that are extracted from the source
+            extract_date_list (list): A list of dates that are extracted from the source - these are meant to be processed and used to make-up the ETL stock-data report.
             meta_key (str): key/name of the meta-file on the S3 bucket
             s3_bucket_conn (S3BucketConnector): S3BucketConnector for the bucket with the meta-file
 

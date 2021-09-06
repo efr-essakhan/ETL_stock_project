@@ -100,6 +100,26 @@ class TestMetaProcessMethods(unittest.TestCase):
             }
         )
 
+    def test_update_meta_file_empty_date_list(self):
+        """Tests the update_meta_file method
+        when the argument extract_date_list is empty
+        """
+        #Expected result
+        return_exp = True
+        log_exp = 'The dataframe is empty! No file will be written!' #Found in S3.py
+        #Test init
+        date_list = []
+        meta_key = 'meta_csv'
+        #Method execution
+        with self.assertLogs() as logm:
+            result = MetaProcess.update_meta_file(date_list, meta_key, self.s3_bucket_conn)
+            #Log test after method execution
+            self.assertIn(log_exp, logm.output[1])
+        #Test after method execution
+        self.assertEqual(return_exp, result)
+
+
+
 if __name__ == "__main__":
     unittest.main()
 
