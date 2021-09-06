@@ -118,6 +118,89 @@ class TestMetaProcessMethods(unittest.TestCase):
         #Test after method execution
         self.assertEqual(return_exp, result)
 
+    def test_update_meta_file_meta_file_ok(self):
+        """  Tests the update_meta_file method
+        when there is already a meta file present in S3
+        """
+        # Expected results
+        date_list_old = ['2021-04-12', '2021-04-13'] #in S3
+        date_list_new = ['2021-04-16', '2021-04-17']
+        date_list_exp = date_list_old + date_list_new
+        proccesed_date_list_exp = [datetime.today().date()] * 4 #processed column of meta-file should have these in new meta-file
+        # Test init
+        meta_key = 'meta.csv'
+        meta_csv_content = (
+          f'{MetaProcessFormat.META_SOURCE_DATE_COL.value},'
+          f'{MetaProcessFormat.META_PROCESS_COL.value}\n'
+          f'{date_list_old[0]},'
+          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESS_DATE_FORMAT.value)}\n'
+          f'{date_list_old[1]},'
+          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESS_DATE_FORMAT.value)}'
+        )
+        self.s3_bucket.put_object(Body=meta_csv_content, Key=meta_key)
+        # Method execution
+        MetaProcess.update_meta_file(date_list_new, meta_key, self.s3_bucket_conn)
+        # Read meta file
+        data = self.s3_bucket.Object(key=meta_key).get().get('Body').read().decode('utf-8')
+        out_buffer = StringIO(data)
+        df_meta_result = pd.read_csv(out_buffer)
+
+        date_list_result = list(df_meta_result[
+            MetaProcessFormat.META_SOURCE_DATE_COL.value])
+        proc_date_list_result = list(pd.to_datetime(df_meta_result[
+        MetaProcessFormat.META_PROCESS_COL.value])\
+            .dt.date)
+
+        # Test after method execution
+        self.assertEqual(date_list_exp, date_list_result)
+        self.assertEqual(proccesed_date_list_exp, proc_date_list_result)
+
+        # Cleanup after test
+        self.s3_bucket.delete_objects(
+            Delete={
+                'Objects': [
+                    {
+                        'Key': meta_key
+                    }
+                ]
+            }
+        )
+
+    def test_update_meta_file_meta_file_wrong(self):
+        """
+        Tests the update_meta_file method
+        when there is a wrong meta file
+        """
+
+        # Expected results
+        date_list_old = ['2021-04-12', '2021-04-13'] #in S3
+        date_list_new = ['2021-04-16', '2021-04-17']
+
+        # Test init
+        meta_key = 'meta.csv'
+        meta_csv_content = (
+          f'wrong_column,{MetaProcessFormat.META_PROCESS_COL.value}\n'
+          f'{date_list_old[0]},'
+          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESS_DATE_FORMAT.value)}\n'
+          f'{date_list_old[1]},'
+          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESS_DATE_FORMAT.value)}'
+        )
+        self.s3_bucket.put_object(Body=meta_csv_content, Key=meta_key)
+        # Method execution & test
+        with self.assertRaises(WrongMetaFileException):
+            MetaProcess.update_meta_file(date_list_new, meta_key, self.s3_bucket_conn)
+
+        # Cleanup after test
+        self.s3_bucket.delete_objects(
+            Delete={
+                'Objects': [
+                    {
+                        'Key': meta_key
+                    }
+                ]
+            }
+        )
+
 
 
 if __name__ == "__main__":
