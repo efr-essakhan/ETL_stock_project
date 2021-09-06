@@ -6,7 +6,7 @@ Purpose is so that it can be used to auto-generate weekly
 report based on this data, without redundancy - dates that have already been done are not included in the report.
 
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 from ETL_sc.common.s3 import S3BucketConnector
 from ETL_sc.common.constants import MetaProcessFormat
 import pandas as pd
@@ -63,10 +63,82 @@ class MetaProcess():
         s3_bucket_conn.write_df_to_s3(df_all, meta_key, MetaProcessFormat.META_FILE_FORMAT.value)
         return True
 
-
-
-
-
+    #Try to understand and create flowchart for this
     @staticmethod
-    def return_date_list():
-        pass
+    def return_date_list(first_date: str, meta_key: str, s3_bucket_meta: S3BucketConnector):
+        """
+        Creating a list of dates (to be used to for extracting of data int the ETL pipeline). List is based on the
+        the input first_date and the already processed dates in the meta_file
+
+        Args:
+            first_date (str): The earliest date Stock date (Xetra) should be processed
+            meta_key (str): key of the meta_file on the S3 bucket
+            s3_bucket_meta (S3BucketConnector): S3BucketConnector for the bucket with the meta file
+
+        Returns:
+            return_min_date: first date that should be processed
+            return_date_list: list of all dates from first_day-1 till today
+        """
+
+        #We need one day before the first_date to do the transformation during E'T'L
+        start_date = datetime.strftime(first_date,
+                                  MetaProcessFormat.META_DATE_FORMAT.value)\
+                                      .date() - timedelta(days=1) #Start_date = first_Date - 1
+
+        today = datetime.today().date()
+
+        try:
+            #If meta file exists in S3 bucket -> create return_date_list using the content of the meta-file
+            #Reading meta-file
+            df_meta = s3_bucket_meta.read_csv_as_df(meta_key) #Would throw exception if non-existance
+
+            #Creating a set of all dates in meta-file
+            src_dates = set(pd.to_datetime(
+                df_meta[MetaProcessFormat.META_SOURCE_DATE_COL.value]
+            ).dt.date)
+
+            #Creating a list of dates from start_date until today
+            dates = [start_date + timedelta(days=x) for x in range(0, \
+                (today-start_date).days+1)] #using start_date instead of first_date as it is already a datetime obj.
+
+            #We dont want to process for the ETL report any duplicate dates, thus do new_dates-old_dates = unprocessed_dates
+            dates_missing = set(dates[1:]) - src_dates #[1:] because we want to skip the start_date
+
+            if dates_missing: #if set has values.
+                #Determining the earliest date that should be selected
+                min_date = min(dates_missing) - timedelta(days=1)
+                #TODO: APPEARS FUTILE
+                return_min_date = (min_date + timedelta(days=1)) \
+                    .strftime(MetaProcessFormat.META_DATE_FORMAT.value)
+
+                #Creating a list of dates from min_date until today
+                return_dates = [
+                    date.strftime(MetaProcessFormat.META_DATE_FORMAT.value) \
+                        for date in dates if date >= min_date
+                ]
+            else:
+                #Setting values for the earliest date and the list of dates
+                return_dates = []
+                return_min_date = datetime(2200,1,1).date()\
+                    .strftime(MetaProcessFormat.META_DATE_FORMAT.value)
+
+        except s3_bucket_meta.session.client('s3').exceptions.NoSuchKey:
+            #No meta-file found -> creating a date list from first_Date-1 day untiltoday
+            return_min_date = first_date
+            return_dates = [\
+                (start_date + timedelta(day=x)).strftime(MetaProcessFormat.META_DATE_FORMAT.value) for x in range(0, (today-start_date).days+1)
+            ]
+
+        return return_min_date, return_dates
+
+
+
+
+
+
+
+
+
+
+
+
