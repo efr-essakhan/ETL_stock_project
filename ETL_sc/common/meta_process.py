@@ -92,8 +92,8 @@ class MetaProcess():
         #This will be the upper limit of the dates.
         today = datetime.today().date()
 
-        try:
-            #If meta file exists in S3 bucket -> create return_date_list utilizing the content of the meta-file
+        try: # If meta file exists in S3 bucket -> create return_date_list utilizing the content of the meta-file
+
             #Reading meta-file
             df_meta = s3_bucket_meta.read_csv_as_df(meta_key) #Would throw exception if non-existance of meta_file
 
@@ -138,6 +138,30 @@ class MetaProcess():
             ]
 
         return return_min_date, return_dates
+
+     @staticmethod
+    def return2_date_list(first_date: str, meta_key: str, s3_bucket_meta: S3BucketConnector):
+
+        #We need one day before the first_date to do the transformation during E'T'L - this value could be discarded and not used if it aleady exists in meta-file
+        first_date_minus1 = datetime.strptime(first_date,
+                                  MetaProcessFormat.META_DATE_FORMAT.value)\
+                                      .date() - timedelta(days=1) #Convert first_date string into datetime obj and get previous day date
+
+        #This will be the upper limit of the dates.
+        today = datetime.today().date()
+
+        try:
+             #Reading meta-file
+            df_meta = s3_bucket_meta.read_csv_as_df(meta_key) #Would throw exception if non-existance of meta_file
+
+            #Create a set out of a list of datetime's taken from the 'source_date' column of df_meta
+            meta_dates_set = set(pd.to_datetime(
+                df_meta[MetaProcessFormat.META_SOURCE_DATE_COL.value]
+            ).dt.date)
+
+
+        except:
+
 
 
 

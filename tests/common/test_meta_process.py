@@ -51,7 +51,7 @@ class TestMetaProcessMethods(unittest.TestCase):
 
         #List comprehension to get last 7 days (from today) as a list
         self.dates = [(datetime.today().date() - timedelta(days=day))\
-            .strftime(MetaProcessFormat.META_DATE_FORMAT.value) for day in range(8)]
+            .strftime(MetaProcessFormat.META_FILE_DATE_FORMAT.value) for day in range(8)]
 
         def tearDown(self):
             # Mocking S3 connection stop
@@ -133,9 +133,9 @@ class TestMetaProcessMethods(unittest.TestCase):
           f'{MetaProcessFormat.META_SOURCE_DATE_COL.value},'
           f'{MetaProcessFormat.META_PROCESS_COL.value}\n'
           f'{date_list_old[0]},'
-          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESS_DATE_FORMAT.value)}\n'
+          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESSED_DATE_FORMAT.value)}\n'
           f'{date_list_old[1]},'
-          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESS_DATE_FORMAT.value)}'
+          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESSED_DATE_FORMAT.value)}'
         )
         self.s3_bucket.put_object(Body=meta_csv_content, Key=meta_key)
         # Method execution
@@ -181,9 +181,9 @@ class TestMetaProcessMethods(unittest.TestCase):
         meta_csv_content = (
           f'wrong_column,{MetaProcessFormat.META_PROCESS_COL.value}\n'
           f'{date_list_old[0]},'
-          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESS_DATE_FORMAT.value)}\n'
+          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESSED_DATE_FORMAT.value)}\n'
           f'{date_list_old[1]},'
-          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESS_DATE_FORMAT.value)}'
+          f'{datetime.today().strftime(MetaProcessFormat.META_PROCESSED_DATE_FORMAT.value)}'
         )
         self.s3_bucket.put_object(Body=meta_csv_content, Key=meta_key)
         # Method execution & test
