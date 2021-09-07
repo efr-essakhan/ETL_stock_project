@@ -80,9 +80,9 @@ class TestMetaProcessMethods(unittest.TestCase):
         data = self.s3_bucket.Object(key=meta_key).get().get('Body').read().decode('utf-8')
         out_buffer = StringIO(data)
         df_meta_result = pd.read_csv(out_buffer)
-        date_list_result = list(df_meta_result[MetaProcessFormat.META_SOURCE_DATE_COL.value])
+        date_list_result = list(df_meta_result[MetaProcessFormat.META_FILE_DATE_COL.value])
         proccesed_date_list_result = list(
-            pd.to_datetime(df_meta_result[MetaProcessFormat.META_PROCESS_COL.value])\
+            pd.to_datetime(df_meta_result[MetaProcessFormat.META_PROCESSED_COL.value])\
                 .dt.date
         )
         #Test after method exection
@@ -130,8 +130,8 @@ class TestMetaProcessMethods(unittest.TestCase):
         # Test init
         meta_key = 'meta.csv'
         meta_csv_content = (
-          f'{MetaProcessFormat.META_SOURCE_DATE_COL.value},'
-          f'{MetaProcessFormat.META_PROCESS_COL.value}\n'
+          f'{MetaProcessFormat.META_FILE_DATE_COL.value},'
+          f'{MetaProcessFormat.META_PROCESSED_COL.value}\n'
           f'{date_list_old[0]},'
           f'{datetime.today().strftime(MetaProcessFormat.META_PROCESSED_DATE_FORMAT.value)}\n'
           f'{date_list_old[1]},'
@@ -146,9 +146,9 @@ class TestMetaProcessMethods(unittest.TestCase):
         df_meta_result = pd.read_csv(out_buffer)
 
         date_list_result = list(df_meta_result[
-            MetaProcessFormat.META_SOURCE_DATE_COL.value])
+            MetaProcessFormat.META_FILE_DATE_COL.value])
         proc_date_list_result = list(pd.to_datetime(df_meta_result[
-        MetaProcessFormat.META_PROCESS_COL.value])\
+        MetaProcessFormat.META_PROCESSED_COL.value])\
             .dt.date)
 
         # Test after method execution
@@ -179,7 +179,7 @@ class TestMetaProcessMethods(unittest.TestCase):
         # Test init
         meta_key = 'meta.csv'
         meta_csv_content = (
-          f'wrong_column,{MetaProcessFormat.META_PROCESS_COL.value}\n'
+          f'wrong_column,{MetaProcessFormat.META_PROCESSED_COL.value}\n'
           f'{date_list_old[0]},'
           f'{datetime.today().strftime(MetaProcessFormat.META_PROCESSED_DATE_FORMAT.value)}\n'
           f'{date_list_old[1]},'
