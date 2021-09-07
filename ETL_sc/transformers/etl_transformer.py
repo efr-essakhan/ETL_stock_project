@@ -1,8 +1,15 @@
 """ETL component"""
 
 import logging
-from typing import List, NamedTuple
+from datetime import datetime
+from typing import NamedTuple
+
+import pandas as pd
+
+from ETL_sc.common.meta_process import MetaProcess
 from ETL_sc.common.s3 import S3BucketConnector
+
+
 
 class EtlSourceConfig(NamedTuple):
     """
@@ -44,7 +51,7 @@ class EtlTargetConfig(NamedTuple):
     trg_key: basic key of target file
     trg_key_date_format: date format of target file
     trg_format: file format of the target file
-    
+
     """
 
     trg_col_isin: str
@@ -60,31 +67,50 @@ class EtlTargetConfig(NamedTuple):
     trg_format: str
 
 class StockETL():
-    "The ETL job. Reads the stock data, transforms and writes the transformed to target."
-    
+    "The ETL job. Reads the stock data, transforms and writes the transformed data to target."
+
     def __init__(self, s3_bucket_src: S3BucketConnector, s3_bucket_trg: S3BucketConnector,
                 meta_key: str, src_args: EtlSourceConfig, trg_args: EtlTargetConfig):
         """
-        :param s3_bucket_src: connection to source S3 bucket
-        :param s3_bucket_trg: connection to target S3 bucket
-        :param meta_key: used as self.meta_key -> key of meta file
-        :param src_args: Namedtuple class with source configuration data
-        :param trg_args: Namedtuple class with target configuration data
+        Constructor
 
+        Args:
+            s3_bucket_src (S3BucketConnector): connection to source S3 bucket
+            s3_bucket_trg (S3BucketConnector): connection to target S3 bucket
+            meta_key (str): key of meta file in S3 bucket
+            src_args (EtlSourceConfig): Namedtuple class with source configuration data
+            trg_args (EtlTargetConfig): Namedtuple class with target configuration data
         """
-        
-        self._logger = logging.getLogger(__name__)  
+        self._logger = logging.getLogger(__name__)
         self.s3_bucket_src = s3_bucket_src
         self.s3_bucket_trg = s3_bucket_trg
         self.meta_key = meta_key
         self.src_args = src_args
         self.trg_args = trg_args
-        self.extract_date =
-        self.extract_date_list = 
-        self.meta_update_list = 
+
+        self.extract_date, self.extract_date_list = MetaProcess.return_date_list(
+            self.src_args.src_first_extract_date, self.meta_key, self.s3_bucket_trg)
+
+        self.meta_update_list = [date for date in self.extract_date_list\
+            if date >= self.extract_date] #TODO: futile?
 
     def extract(self):
-        pass
+        """Read the source files as per the dates in self.extract_date_list needed,
+        and concatenates them to one Pandas DataFrame
+
+        Returns:
+             data_frame: Pandas DataFrame with the extracted data to transform from source
+        """
+        self._logger.info('Extracting Stock-data (Xetra) source files started...')
+        files = [key for date in self.extract_date_list\
+                     for key in self.s3_bucket_src.list_files_in_prefix(date)]
+        if not files:
+            data_frame = pd.DataFrame()
+        else:
+            data_frame = pd.concat([self.s3_bucket_src.read_csv_to_df(file)\
+                for file in files], ignore_index=True)
+        self._logger.info('Extracting Stock-data (Xetra) source files finished.')
+        return data_frame
 
     def transform_report1(self):
         pass
