@@ -5,10 +5,11 @@ import boto3
 from moto import mock_s3
 import os
 import pandas as pd
+from unittest.mock import patch
 
 from ETL_sc.common.s3 import S3BucketConnector
 from ETL_sc.transformers.etl_transformer import EtlSourceConfig, EtlTargetConfig, StockETL
-
+from ETL_sc.common.meta_process import MetaProcess
 class TestXetraETLMethods(unittest.TestCase):
     """
         Testing the XetraETL class.
@@ -119,6 +120,7 @@ class TestXetraETLMethods(unittest.TestCase):
         self.s3_bucket_src.write_df_to_s3(self.df_src.loc[8:8],
         '2021-04-19/2021-04-19_BINS_XETR09.csv','csv')
 
+         #report to be produced
         columns_report = ['ISIN', 'Date', 'opening_price_eur', 'closing_price_eur',
         'minimum_price_eur', 'maximum_price_eur', 'daily_traded_volume', 'change_prev_closing_%']
         data_report = [['AT0000A0E9W5', '2021-04-17', 20.21, 18.27, 18.21, 21.34, 1088, 10.62],
@@ -126,7 +128,31 @@ class TestXetraETLMethods(unittest.TestCase):
                        ['AT0000A0E9W5', '2021-04-19', 23.58, 24.22, 22.21, 25.01, 3586, 14.58]]
         self.df_report = pd.DataFrame(data_report, columns=columns_report)
 
+    def tearDown(self):
+        # mocking s3 connection stop
+        self.mock_s3.stop()
 
 
 
 
+
+    def test_extract_no_files(self):
+        """
+        Tests the extract method when
+        there are no files to be extracted
+        """
+
+        # Test init
+        extract_date = '2200-01-02'
+        extract_date_list = []
+
+        # Method execution
+        with patch.object(MetaProcess, "return_date_list",
+        return_value=[extract_date, extract_date_list]):
+
+            stock_etl = StockETL(self.s3_bucket_src, self.s3_bucket_trg,
+                         self.meta_key, self.source_config, self.target_config)
+            df_return = stock_etl.extract()
+
+        # Test after method execution
+        self.assertTrue(df_return.empty)
