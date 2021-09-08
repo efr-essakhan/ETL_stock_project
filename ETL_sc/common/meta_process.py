@@ -63,7 +63,6 @@ class MetaProcess():
         s3_bucket_conn.write_df_to_s3(df_all, meta_key, MetaProcessFormat.META_FILE_FORMAT.value)
         return True
 
-    #TODO: May have to simplify to bs to be a straightforwards, get last 7 days kind of thing.
     @staticmethod
     def return_date_list(first_date: str, meta_key: str, s3_bucket_meta: S3BucketConnector):
         """
@@ -76,13 +75,13 @@ class MetaProcess():
         For intuitive overview of the logic of this algoirthm see: @/ETL_stock_project\proof-of-concept/Experimenting return_date_list
 
         Args:
-            first_date (str): The desired earliest date Stock date (Xetra) should be processed
+            first_date (str): The desired earliest date Stock data (Xetra) should be processed
             meta_key (str): key of the meta_file on the S3 bucket
             s3_bucket_meta (S3BucketConnector): S3BucketConnector for the bucket with the meta file
 
         Returns:
-            return_min_date (str): first date that should be processed
-            return_date_list: list of all dates from first_day-1 till today that have not been processed previously.
+            return_min_date (str): first date that should be processed (lower bound)
+            return_date_list: list of all dates from return_min_date-1 till today (i.e. day the job is ran), exlclusing those that have already been processed and are not needed unnessecarily.
         """
 
         #We need one day before the first_date to do the transformation during E'T'L - this value could be discarded and not used if it aleady exists in meta-file

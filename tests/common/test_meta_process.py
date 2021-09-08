@@ -201,7 +201,33 @@ class TestMetaProcessMethods(unittest.TestCase):
             }
         )
 
-    #TODO: complete unit tests later frm geet, change structure too
+    def test_return_date_list_no_meta_file(self):
+            """
+            Tests the return_date_list method
+            when there is no meta file
+            """
+
+            # Expected results
+            date_list_exp = [ #If today = 25, then list produced: [25,24,23,22]
+                (datetime.today().date() - timedelta(days=day))\
+                    .strftime(MetaProcessFormat.META_FILE_DATE_FORMAT.value) for day in range(4)
+                ]
+
+            min_date_exp = (datetime.today().date() - timedelta(days=2))\
+            .strftime(MetaProcessFormat.META_FILE_DATE_FORMAT.value)  #If today = 25, then val produced: 23
+
+            # Test init
+            first_date = min_date_exp
+            meta_key = 'meta.csv'
+
+            # Method execution
+            min_date_return, date_list_return = MetaProcess.return_date_list(first_date, meta_key,
+                                                                             self.s3_bucket_conn)
+
+              # Test after method execution
+            self.assertEqual(set(date_list_exp), set(date_list_return))
+            self.assertEqual(min_date_exp, min_date_return)
+
 
 
 
