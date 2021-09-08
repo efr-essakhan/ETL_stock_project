@@ -95,7 +95,9 @@ class StockETL():
             if date >= self.extract_date] #TODO: futile?
 
     def extract(self):
-        """Read the source files as per the dates in self.extract_date_list needed,
+        """
+
+        Read the source files as per the dates in self.extract_date_list needed,
         and concatenates them to one Pandas DataFrame
 
         Returns:
@@ -112,8 +114,20 @@ class StockETL():
         self._logger.info('Extracting Stock-data (Xetra) source files finished.')
         return data_frame
 
-    def transform_report1(self):
-        pass
+    def transform_report1(self, data_frame: pd.DataFrame):
+        """Applies the necessary transformation to create report 1
+
+        Args:
+            data_frame (pd.DataFrame): Pandas DataFrame as Input
+
+        Returns:
+            [type]: Pandas DataFrame as Input
+        """
+
+        if data_frame.empty:
+            self._logger.info('The dataframe is empty. No transformations will be applied.')
+            return data_frame
+
 
     def load(self):
         pass
