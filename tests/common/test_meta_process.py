@@ -327,9 +327,42 @@ class TestMetaProcessMethods(unittest.TestCase):
         )
 
 
+    def test_return_date_list_empty_date_list(self):
+        """
+        Tests the return_date_list method
+        when there are no dates to be returned
+        """
 
+        # Expected results
+        min_date_exp = '2200-01-01'
+        date_list_exp = []
+        # Test init
+        meta_key = 'meta.csv'
+        meta_content = (
+          f'{MetaProcessFormat.META_FILE_DATE_COL.value},'
+          f'{MetaProcessFormat.META_PROCESSED_COL.value}\n'
+          f'{self.dates[0]},{self.dates[0]}\n'
+          f'{self.dates[1]},{self.dates[0]}'
+        )
+        self.s3_bucket.put_object(Body=meta_content, Key=meta_key)
+        first_date = self.dates[0]
+        # Method execution
+        min_date_return, date_list_return = MetaProcess.return_date_list(first_date, meta_key,
+                                                                         self.s3_bucket_conn)
+        # Test after method execution
+        self.assertEqual(date_list_exp, date_list_return)
+        self.assertEqual(min_date_exp, min_date_return)
 
-
+        # Cleanup after test
+        self.s3_bucket.delete_objects(
+            Delete={
+                'Objects': [
+                    {
+                        'Key': meta_key
+                    }
+                ]
+            }
+        )
 
 
 if __name__ == "__main__":
