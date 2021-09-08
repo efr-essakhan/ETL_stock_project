@@ -293,6 +293,41 @@ class TestMetaProcessMethods(unittest.TestCase):
         )
 
 
+    def test_return_date_list_meta_file_wrong(self):
+        """
+        Tests the return_date_list method
+        when there is a wrong meta file
+        """
+        # Test init
+        meta_key = 'meta.csv'
+
+        meta_content = (
+            f'wrong_column_name,{MetaProcessFormat.META_PROCESSED_COL.value}\n'
+            f'{self.dates[3]},{self.dates[0]}\n'  #If today = 25, then this row is: 22,25
+            f'{self.dates[4]},{self.dates[0]}'  #If today = 25, then this row is: 21,25
+        )
+
+        self.s3_bucket.put_object(Body=meta_content, Key=meta_key)
+
+        first_date = self.dates[1] #If today = 25, then this: 24
+
+        # Method execution
+        with self.assertRaises(KeyError): #program breaks - error not caught, would occur when we try to filter the df with expected column name
+            MetaProcess.return_date_list(first_date, meta_key, self.s3_bucket_conn)
+
+        # Cleanup after test
+        self.s3_bucket.delete_objects(
+            Delete={
+                'Objects': [
+                    {
+                        'Key': meta_key
+                    }
+                ]
+            }
+        )
+
+
+
 
 
 
