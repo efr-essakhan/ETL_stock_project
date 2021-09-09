@@ -194,6 +194,11 @@ class StockETL():
         return data_frame
 
     def load(self, data_frame: pd.DataFrame):
+        """Saves a Pandas DataFrame to the target
+
+        Args:
+            data_frame (pd.DataFrame): Pandas DataFrame as Input
+        """
         # Creating target key
         target_key = (
             f'{self.trg_args.trg_key}'
@@ -211,7 +216,16 @@ class StockETL():
         return True
 
     def etl_report1(self):
-        pass
+        """
+        Extract, transform and load to create report 1
+        """
+        # Extraction
+        data_frame = self.extract()
+        # Transformation
+        data_frame = self.transform_report1(data_frame)
+        # Load
+        self.load(data_frame)
+        return True
 
 
 

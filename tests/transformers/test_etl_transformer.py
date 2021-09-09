@@ -264,8 +264,51 @@ class TestXetraETLMethods(unittest.TestCase):
         self.assertTrue(df_exp.equals(df_result))
 
         #Verifying meta-file
-        meta_file = self.s3_bucket_trg.list_files_in_prefix(se
-                                                            lf.meta_key)[0]
+        meta_file = self.s3_bucket_trg.list_files_in_prefix(self.meta_key)[0]
+        df_meta_result = self.s3_bucket_trg.read_csv_as_df(meta_file)
+        self.assertEqual(list(df_meta_result[MetaProcessFormat.META_FILE_DATE_COL.value]), meta_exp)
+
+        # Cleanup after test
+        self.trg_bucket.delete_objects(
+            Delete={
+                'Objects': [
+                    {
+                        'Key': trg_file
+                    },
+                    {
+                        'Key': meta_file
+                    }
+                ]
+            }
+        )
+
+    def test_etl_report1(self):
+        """
+        Tests the etl_report1 method
+        """
+        # Expected results
+        df_exp = self.df_report
+        meta_exp = ['2021-04-17', '2021-04-18', '2021-04-19']
+        # Test init
+        extract_date = '2021-04-17'
+        extract_date_list = ['2021-04-16', '2021-04-17', '2021-04-18', '2021-04-19']
+
+        # Method execution
+        with patch.object(MetaProcess, "return_date_list",
+        return_value=[extract_date, extract_date_list]):
+            xetra_etl = StockETL(self.s3_bucket_src, self.s3_bucket_trg,
+                         self.meta_key, self.source_config, self.target_config)
+            xetra_etl.etl_report1()
+
+        # Test after method execution
+        trg_file = self.s3_bucket_trg.list_files_in_prefix(self.target_config.trg_key)[0]
+        data = self.trg_bucket.Object(key=trg_file).get().get('Body').read()
+        out_buffer = BytesIO(data)
+        df_result = pd.read_parquet(out_buffer)
+
+        self.assertTrue(df_exp.equals(df_result))
+
+        meta_file = self.s3_bucket_trg.list_files_in_prefix(self.meta_key)[0]
         df_meta_result = self.s3_bucket_trg.read_csv_as_df(meta_file)
         self.assertEqual(list(df_meta_result[MetaProcessFormat.META_FILE_DATE_COL.value]), meta_exp)
 
