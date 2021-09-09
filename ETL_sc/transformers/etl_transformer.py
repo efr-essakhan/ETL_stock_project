@@ -121,13 +121,77 @@ class StockETL():
             data_frame (pd.DataFrame): Pandas DataFrame as Input
 
         Returns:
-            [type]: Pandas DataFrame as Input
+            pd.DataFrame: Pandas DataFrame as Input
         """
+
 
         if data_frame.empty:
             self._logger.info('The dataframe is empty. No transformations will be applied.')
             return data_frame
 
+        self._logger.info('Applying transformations to Xetra source data for report 1 started...')
+
+        # Filtering necessary source columns
+        data_frame = data_frame.loc[:, self.src_args.src_columns]
+
+        # Removing rows with missing values
+        data_frame.dropna(inplace=True)
+
+         # Calculating opening price per ISIN and day
+        data_frame[self.trg_args.trg_col_op_price] = data_frame\
+            .sort_values(by=[self.src_args.src_col_time])\
+                .groupby([
+                    self.src_args.src_col_isin,
+                    self.src_args.src_col_date
+                    ])[self.src_args.src_col_start_price]\
+                    .transform('first')
+
+         # Calculating closing price per ISIN and day
+        data_frame[self.trg_args.trg_col_clos_price] = data_frame\
+            .sort_values(by=[self.src_args.src_col_time])\
+                .groupby([
+                    self.src_args.src_col_isin,
+                    self.src_args.src_col_date
+                    ])[self.src_args.src_col_start_price]\
+                        .transform('last')
+
+        # Renaming columns
+        data_frame.rename(columns={
+            self.src_args.src_col_min_price: self.trg_args.trg_col_min_price,
+            self.src_args.src_col_max_price: self.trg_args.trg_col_max_price,
+            self.src_args.src_col_traded_vol: self.trg_args.trg_col_dail_trade_vol
+            }, inplace=True)
+
+        # Aggregating per ISIN and day -> opening price, closing price,
+        # minimum price, maximum price, traded volume
+        data_frame = data_frame.groupby([
+            self.src_args.src_col_isin,
+            self.src_args.src_col_date], as_index=False)\
+                .agg({
+                    self.trg_args.trg_col_op_price: 'min',
+                    self.trg_args.trg_col_clos_price: 'min',
+                    self.trg_args.trg_col_min_price: 'min',
+                    self.trg_args.trg_col_max_price: 'max',
+                    self.trg_args.trg_col_dail_trade_vol: 'sum'})
+
+        # Change of current day's closing price compared to the
+        # previous trading day's closing price in %
+        data_frame[self.trg_args.trg_col_ch_prev_clos] = data_frame\
+            .sort_values(by=[self.src_args.src_col_date])\
+                .groupby([self.src_args.src_col_isin])[self.trg_args.trg_col_op_price]\
+                    .shift(1)
+        data_frame[self.trg_args.trg_col_ch_prev_clos] = (
+            data_frame[self.trg_args.trg_col_op_price] \
+            - data_frame[self.trg_args.trg_col_ch_prev_clos]
+            ) / data_frame[self.trg_args.trg_col_ch_prev_clos ] * 100
+
+        # Rounding to 2 decimals
+        data_frame = data_frame.round(decimals=2)
+
+        # Removing the day before extract_date
+        data_frame = data_frame[data_frame.Date >= self.extract_date].reset_index(drop=True)
+        self._logger.info('Applying transformations to Xetra source data finished...')
+        return data_frame
 
     def load(self):
         pass
