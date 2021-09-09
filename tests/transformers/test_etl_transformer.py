@@ -326,8 +326,5 @@ class TestXetraETLMethods(unittest.TestCase):
             }
         )
 
-
-
-
 if __name__ == "__main__":
     unittest.main(); #Calls Setup> all tests > tear-down
