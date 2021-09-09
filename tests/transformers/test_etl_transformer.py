@@ -78,7 +78,7 @@ class TestXetraETLMethods(unittest.TestCase):
             'trg_col_clos_price': 'closing_price_eur',
             'trg_col_min_price': 'minimum_price_eur',
             'trg_col_max_price': 'maximum_price_eur',
-            'trg_col_dail_trad_vol': 'daily_traded_volume',
+            'trg_col_dail_trade_vol': 'daily_traded_volume',
             'trg_col_ch_prev_clos': 'change_prev_closing_%',
             'trg_key': 'report1/xetra_daily_report1_',
             'trg_key_date_format': '%Y%m%d_%H%M%S',
@@ -143,16 +143,20 @@ class TestXetraETLMethods(unittest.TestCase):
         """
 
         # Test init
-        extract_date = '2200-01-02'
+        extract_date = '2200-01-02' #passing non-existant start-date
         extract_date_list = []
 
+        #TODO: check lrn
         # Method execution
-        with patch.object(MetaProcess, "return_date_list",
+        with patch.object(MetaProcess, "return_date_list", #wherever MetaProcess.return_date_list() is used (used during StockETL(...)), it uses the default returns of extract_date, extract_date_list
         return_value=[extract_date, extract_date_list]):
 
             stock_etl = StockETL(self.s3_bucket_src, self.s3_bucket_trg,
-                         self.meta_key, self.source_config, self.target_config)
+                            self.meta_key, self.source_config, self.target_config)
             df_return = stock_etl.extract()
 
         # Test after method execution
         self.assertTrue(df_return.empty)
+
+if __name__ == "__main__":
+    unittest.main(); #Calls Setup> all tests > tear-down

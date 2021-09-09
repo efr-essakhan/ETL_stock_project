@@ -46,7 +46,7 @@ class EtlTargetConfig(NamedTuple):
     trg_col_clos_price: column name for closing price in target
     trg_col_min_price: column name for minimum price in target
     trg_col_max_price: column name for maximum price in target
-    trg_col_dail_tread_vol: column name for daily traded volume in target
+    trg_col_dail_trade_vol: column name for daily traded volume in target
     trg_col_ch_prev_clos: column name for change to previous day's closing price in target
     trg_key: basic key of target file
     trg_key_date_format: date format of target file
@@ -60,7 +60,7 @@ class EtlTargetConfig(NamedTuple):
     trg_col_clos_price: str
     trg_col_min_price: str
     trg_col_max_price: str
-    trg_col_dail_tread_vol: str
+    trg_col_dail_trade_vol: str
     trg_col_ch_prev_clos: str
     trg_key: str
     trg_key_date_format: str
@@ -101,12 +101,12 @@ class StockETL():
         and concatenates them to one Pandas DataFrame
 
         Returns:
-             data_frame: Pandas DataFrame with the extracted data to transform from source
+             data_frame: Pandas DataFrame with the extracted data to transform, from source
         """
         self._logger.info('Extracting Stock-data (Xetra) source files started...')
         files = [key for date in self.extract_date_list\
-                     for key in self.s3_bucket_src.list_files_in_prefix(date)]
-        if not files:
+                     for key in self.s3_bucket_src.list_files_in_prefix(date)] #for each hour there is a seperate file in bucket.
+        if not files: #checking if list empty
             data_frame = pd.DataFrame()
         else:
             data_frame = pd.concat([self.s3_bucket_src.read_csv_to_df(file)\
