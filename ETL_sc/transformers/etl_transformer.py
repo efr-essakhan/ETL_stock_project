@@ -109,7 +109,7 @@ class StockETL():
         if not files: #checking if list empty
             data_frame = pd.DataFrame()
         else:
-            data_frame = pd.concat([self.s3_bucket_src.read_csv_to_df(file)\
+            data_frame = pd.concat([self.s3_bucket_src.read_csv_as_df(file)\
                 for file in files], ignore_index=True)
         self._logger.info('Extracting Stock-data (Xetra) source files finished.')
         return data_frame

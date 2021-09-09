@@ -132,10 +132,6 @@ class TestXetraETLMethods(unittest.TestCase):
         # mocking s3 connection stop
         self.mock_s3.stop()
 
-
-
-
-
     def test_extract_no_files(self):
         """
         Tests the extract method when
@@ -146,7 +142,6 @@ class TestXetraETLMethods(unittest.TestCase):
         extract_date = '2200-01-02' #passing non-existant start-date
         extract_date_list = []
 
-        #TODO: check lrn
         # Method execution
         with patch.object(MetaProcess, "return_date_list", #wherever MetaProcess.return_date_list() is used (used during StockETL(...)), it uses the default returns of extract_date, extract_date_list
         return_value=[extract_date, extract_date_list]):
@@ -157,6 +152,32 @@ class TestXetraETLMethods(unittest.TestCase):
 
         # Test after method execution
         self.assertTrue(df_return.empty)
+
+
+    def test_extract_files(self):
+        """
+        Tests the extract method when
+        there are files to be extracted
+        """
+        # Expected results
+        df_exp = self.df_src.loc[1:8].reset_index(drop=True)
+        # Test init
+        extract_date = '2021-04-17'
+        extract_date_list = ['2021-04-16', '2021-04-17', '2021-04-18', '2021-04-19', '2021-04-20']
+        # Method execution
+        with patch.object(MetaProcess, "return_date_list",
+        return_value=[extract_date, extract_date_list]):
+            xetra_etl = StockETL(self.s3_bucket_src, self.s3_bucket_trg,
+                         self.meta_key, self.source_config, self.target_config)
+            df_result = xetra_etl.extract()
+        # Test after method execution
+        self.assertTrue(df_exp.equals(df_result))
+
+
+
+
+
+
 
 if __name__ == "__main__":
     unittest.main(); #Calls Setup> all tests > tear-down
