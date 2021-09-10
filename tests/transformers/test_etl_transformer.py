@@ -1,4 +1,4 @@
-"""TestETLMethods"""
+"""Test ETLMethods"""
 
 import unittest
 import boto3
@@ -12,9 +12,10 @@ from ETL_sc.common.s3 import S3BucketConnector
 from ETL_sc.transformers.etl_transformer import EtlSourceConfig, EtlTargetConfig, StockETL
 from ETL_sc.common.meta_process import MetaProcess
 from ETL_sc.common.constants import MetaProcessFormat
-class TestXetraETLMethods(unittest.TestCase):
+
+class IntTestStockETLMethods(unittest.TestCase):
     """
-        Testing the XetraETL class.
+        Testing the StockETL class.
     """
 
     def setUp(self):
