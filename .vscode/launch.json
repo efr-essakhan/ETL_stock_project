@@ -4,12 +4,16 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+
         {
-            "name": "Python: Current File",
+            "name": "stock_xetra_etl_run",
             "type": "python",
+            "python.path": "C:/Users/Essa/.virtualenvs/ETL_stock_project-8fWnCrNQ/scripts/python.exe",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
+            "program": "C:/Users/Essa/Documents/GitHub/ETL_Stock_project/ETL_stock_project/run.py",
+            "console": "integratedTerminal",
+            "args": ["C:/Users/Essa/Documents/GitHub/ETL_Stock_project/ETL_stock_project/configs/etl_report1_config.yml"]
         }
     ]
 }
