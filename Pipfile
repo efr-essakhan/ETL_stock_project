@@ -16,6 +16,8 @@ pylint = "*"
 moto = "*"
 coverage = "*"
 jupyter-contrib-nbextensions = "*"
+memory-profiler = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.9"
