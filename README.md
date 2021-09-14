@@ -14,11 +14,36 @@ Xetra stands for Exchange Electronic Trading and it is the trading platform of t
 
 ## Goals
 
-Here are the goals stands for Exchange Electronic Trading and it is the trading platform of the Deutsche Börse Group.
+Here are the technical goals that were achieved with this package:
 
-:white_check_mark: Used virtual environment
+:white_check_mark: Achieved
+:white_large_square: In-progress
 
-:white_check_mark: Used exeption handling
+:white_check_mark: OOP application
 
-:white_check_mark: Used linting
+:white_check_mark: virtual environment using Pipenv
+
+:white_check_mark: exeption handling
+
+:white_check_mark: linting using pylint
+
+:white_check_mark: dependency management
+
+:white_check_mark: Done unit testing (unittesting package) using mock objects (using moto & unittest.mock package)
+
+:white_check_mark: Integration testing
+
+:white_check_mark: Achieved 100% testing coverage - verified using coverage package.
+
+:white_check_mark: Configuration file support to allow parameters.
+
+:white_check_mark: Memory-profiler package used to check performance.
+
+:white_check_mark: Dockerization
+
+:white_large_square: Orchestration using Apache Airflow
+
+
+
+
 
