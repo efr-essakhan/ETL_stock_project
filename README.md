@@ -67,7 +67,7 @@ Here are the technical goals that were achieved with this package:
 
 :white_check_mark: Memory-profiler package used to check performance.
 
-:white_check_mark: Dockerization
+:white_large_square: Dockerization
 
 :white_large_square: Orchestration using Apache Airflow
 
