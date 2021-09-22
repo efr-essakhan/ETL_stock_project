@@ -14,9 +14,6 @@ from ETL_sc.common.s3 import S3BucketConnector
 
 class TestS3BucketConnectorMethods(unittest.TestCase):
     """Testing the S3BucketConnector class
-
-    Args:
-        unittest ([type]): [description]
     """
 
     def setUp(self):

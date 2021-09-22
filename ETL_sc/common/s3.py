@@ -32,7 +32,6 @@ class S3BucketConnector():
                                          endpoint_url=endpoint_url) #single underline means protected variable, double underline means private variable. _s3 <- protected var data members of a class that can be accessed within the class and the classes derived from that class.
         self._bucket = self._s3.Bucket(bucket_name)
 
-    @profile
     def list_files_in_prefix(self, prefix: str):
         """listing all files/objects in an S3 bucket with a specific prefix.
 
@@ -45,7 +44,6 @@ class S3BucketConnector():
         files = [obj.key for obj in self._bucket.objects.filter(Prefix=prefix)]
         return files #files names in reality
 
-    @profile
     def read_csv_as_df(self, key: str, encoding: str = 'utf-8', sep = ','):
         """Reading the csv file from the S3 bucket and returning the file as a dataframe
 
@@ -64,7 +62,6 @@ class S3BucketConnector():
         data_frame = pd.read_csv(data, sep=sep)
         return data_frame
 
-    @profile
     def write_df_to_s3(self, data_frame: pd.DataFrame, key: str, file_format: str):
         """Writing a pandas DF to S3 bucket, first converting it into .CSV or .Parquet before storing.
         Supported formats: .csv, .parquet
@@ -95,9 +92,6 @@ class S3BucketConnector():
         else:
             self._logger.info('The file format %s is not supported supported to be written to S3', file_format)
             raise WrongFormatException
-
-
-
 
     def __put_object(self, out_buffer: StringIO or BytesIO, key: str):
         """Helper function for self.write_df_to_s3(). Put file into target bucket.

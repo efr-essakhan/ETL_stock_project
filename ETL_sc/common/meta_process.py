@@ -2,8 +2,8 @@
 Methods for processing the meta file
 
 The meta-file purpose is to hold checkpoint data of what day reports have been done already and at what time the processing of the stock-data was done.
-Purpose is so that it can be used to auto-generate weekly
-report based on this data, without redundancy - dates that have already been done are not included in the report.
+Purpose is so that it can be used to keep track of already processed dates for auto-generating weekly
+reports, also without redundancy - dates that have already been done are not unnescarily processed again.
 
 """
 from datetime import datetime, timedelta
@@ -68,7 +68,8 @@ class MetaProcess():
         """
         Creating a list of dates (to be used to for extracting of correctly dated data into the ETL pipeline for transformation). List is based on the
         the input first_date and the already processed dates in the meta_file. Aim of algorithm is to avoid returning back a list of dates which contains
-        already previously processed dates unnsessecarily.
+        already previously processed dates unnsessecarily. There is always a fixed start-date given in the configuration file, this algorithm figures out
+        to get the <= last 7 days worth of days from today, but also
 
         Note: The upper-bound date is always today's date. But the lower-bound/minimum date is figured out utlizing meta-file.
 

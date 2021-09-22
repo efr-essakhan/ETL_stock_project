@@ -29,10 +29,11 @@
         "tests/Test_Specification.xlsx": false,
         "ETL_sc/__pycache__": false,
         "ETL_sc\\common/__pycache__": false,
-        "**/__pycache__": false,
+        "**/__pycache__": true,
         "ETL_sc\\common/*.*": false,
         "__pycache__": false,
-        "tests/.coverage": false
+        "tests/.coverage": false,
+        "**/__init__.py": true
     },
     "explorerExclude.backup": null,
     "python.testing.unittestArgs": [

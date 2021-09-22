@@ -1,26 +1,4 @@
 FROM python:3.9-slim-buster
 
-#Setting environment variables
-# Do not cache Python packages -
-ENV PIP_NO_CACHE_DIR=yes
-
-# Keeps Python from generating .pyc files in the container 
-ENV PYHONDONTWRITEBYTECODE
-
-# set PYTHONPATH - where my working directory is
-ENV PYTHONPATH "$(PYTHONPATH):/code/"
-
-# Initiliaze new working directory #The directories and files that should be needed
-WORKDIR /code
-
-# Transferring the code and essential data
-COPY ETL_sc ./ETL_sc
-COPY Pipfile ./Pipfile
-COPY Pipfile.lock ./Pipfile.lock
-COPY run.py ./run.py
-
-RUN pip install pipenv
-#Install packages into entire python installation (no virtual environment created)
-RUN pipenv install --ignore-pipfile --system
-
+#TODO: complete
 
