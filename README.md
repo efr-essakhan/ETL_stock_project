@@ -28,6 +28,10 @@ Here are some rows of the Report produced from this ETL application (an aggregat
 
 The source code of the application is available in the ETL_sc folder and the corresponding unit & integration tests in the tests folder of this repository, from root.
 
+***ETL_sc folder structure:***
+
+![line of code](github_pics/folder.PNG)
+
 ***The python files and their constituent in the folder ETL_sc:***
 
 ![line of code](github_pics/ETL_classes_methods_overview.PNG)
